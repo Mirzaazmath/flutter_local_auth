@@ -1,11 +1,16 @@
+// THIS IMPORT IS USED TO TERMINAL THE APP
 import 'dart:io';
-
+// THIS IMPORT IS USED TO USE MATERIAL DESIGN
 import 'package:flutter/material.dart';
+// THIS IMPORT IS USED TO CLOSE THE ANDROID APP
 import 'package:flutter/services.dart';
+// THIS IMPORT IS USED TO CHECK THE PLATFORM EXECPTION ERRORS
 import 'package:local_auth/error_codes.dart' as auth_error;
+// THIS IMPORT IS USED TO USE THE LOCAL AUTH IN FLUTTER
 import 'package:local_auth/local_auth.dart';
-
+// MAIN
 void main() {
+  // RUNAPP
   runApp(const MyApp());
 }
 
@@ -36,6 +41,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // HERE WE ARE CREATING THE INSTANCE FOR LOCAL AUTH
   final LocalAuthentication auth = LocalAuthentication();
   int _counter = 0;
 
@@ -49,35 +55,48 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // CALLING THE checkLocalAuth METHOD TO CHECK THE LOCAL AUTH
     checkLocalAuth();
   }
-
+// FUTURE METHODS TAKES TIME TO RETURN RESULT
   Future<void> checkLocalAuth() async {
+    // HERE WE ARE CHECKING IF THE DEVICE HAS THE LOCAL AUTH OR NOT IT RETURNS BOOL
     final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
+    // IF THE RETURN VALUE IS TRUE WE ARE GOING TO PERFORM LOCAL AUTH
     if (canAuthenticateWithBiometrics) {
+      // ALWAYS USE TRY CATCH TO HANDEL EXCEPTIONS
       try {
+        // auth.authenticate RETURN RESULT OF  THE LOCAL AUTH IN BOOL
         final bool didAuthenticate = await auth.authenticate(
             localizedReason: 'Please authenticate to show account balance');
 
         debugPrint(didAuthenticate.toString());
-
+      // CHECKING THE RESULT OF LOCAL AUTH
         if (didAuthenticate) {
+
         } else {
+          // IF FALSE WE SIMPLY CLOSE THE APP
+          // NOTE THIS LINE ONLY WORKS FOR ANDROID
           SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          // CLOSING THE APP
 
         }
 
-        // ···
+        // CHECKING THE Exception TO HANDLE
       } on PlatformException catch (e) {
+        // PRINTING THE ERROR
         debugPrint(e.toString());
-
+         // BASED ON THE EXCEPTION ERROR WE ARE TRYING TO SOLVE THE ISSUE
         if (e.code == auth_error.notEnrolled) {
           // Add handling of no hardware here.
         } else if (e.code == auth_error.lockedOut ||
             e.code == auth_error.permanentlyLockedOut) {
           // ...
         } else if (e.code == auth_error.notAvailable) {
+          // THIS ERROR HAPPENED WHEN I CANCEL FACE UNLOCK FROM IOS
           debugPrint("Exiting the App");
+          // THIS LINE TERMINATE THE APP FORCEFULLY
+          // NOTE DO NOT USE THIS, INSTEAD COME UP WITH DIFFERENT SOLUTION
           exit(0);
           // ...
         } else {}
